@@ -131,9 +131,12 @@ class Agent:
             )
             self.debug_print(response)
 
-            if "output" not in response and self.debug:
-                print(response)
-                raise ValueError("No output from model")
+            if "output" not in response:
+                print("Error: API response does not contain 'output' key.")
+                print(response)  # It's helpful to print the full error response
+                raise ValueError(
+                    "No output from model. Check API error response above."
+                )
             else:
                 new_items += response["output"]
                 for item in response["output"]:

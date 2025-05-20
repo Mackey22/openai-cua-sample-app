@@ -1,4 +1,4 @@
-from playwright.sync_api import Browser, Page
+from playwright.sync_api import Browser, Page, FilePayload
 from ..shared.base_playwright import BasePlaywrightComputer
 
 
@@ -51,3 +51,12 @@ class LocalPlaywrightBrowser(BasePlaywrightComputer):
             else:
                 print("Warning: All pages have been closed.")
                 self._page = None
+
+    def upload_file(self, x: int, y: int, file_payloads: list[FilePayload]) -> None:
+        """
+        Clicks at the given coordinates to trigger a file chooser and uploads the specified file.
+        """
+        with self._page.expect_file_chooser() as fc_info:
+            self._page.mouse.click(x, y)
+        file_chooser = fc_info.value
+        file_chooser.set_files(file_payloads)

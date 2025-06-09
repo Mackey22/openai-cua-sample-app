@@ -123,6 +123,8 @@ class Agent:
         while new_items[-1].get("role") != "assistant" if new_items else True:
             self.debug_print([sanitize_message(msg) for msg in input_items + new_items])
 
+            # print("input_items + new_items", input_items + new_items)
+
             response = create_response(
                 model=self.model,
                 input=input_items + new_items,
@@ -132,14 +134,21 @@ class Agent:
             self.debug_print(response)
 
             if "output" not in response:
-                print("Error: API response does not contain 'output' key.")
-                print(response)  # It's helpful to print the full error response
-                raise ValueError(
-                    "No output from model. Check API error response above."
+                response = create_response(
+                    model=self.model,
+                    input=input_items + new_items,
+                    tools=self.tools,
+                    truncation="auto",
                 )
-            else:
-                new_items += response["output"]
-                for item in response["output"]:
-                    new_items += self.handle_item(item)
+                if "output" not in response:
+                    print("Retried and got another unsuccesful response")
+                    print(response)  # It's helpful to print the full error response
+                    raise ValueError(
+                        "No output from model. Check API error response above."
+                    )
+
+            new_items += response["output"]
+            for item in response["output"]:
+                new_items += self.handle_item(item)
 
         return new_items
